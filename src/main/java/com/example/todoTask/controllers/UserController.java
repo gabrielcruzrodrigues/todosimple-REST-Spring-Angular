@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.service.annotation.DeleteExchange;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/user")
@@ -29,7 +32,14 @@ public class UserController {
     @Validated(User.CreateUser.class)
     public ResponseEntity<User> create(@Valid @RequestBody User userObj) {
         this.userService.create(userObj);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userObj);
+
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(userObj.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(userObj);
     }
 
     @PutMapping("/{id}")
