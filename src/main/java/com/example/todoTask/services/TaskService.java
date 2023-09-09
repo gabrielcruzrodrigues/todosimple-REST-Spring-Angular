@@ -1,9 +1,9 @@
 package com.example.todoTask.services;
 
+import com.example.todoTask.models.User;
 import com.example.todoTask.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.todoTask.repositories.UserRepository;
 import com.example.todoTask.models.Task;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
 public class TaskService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
     @Autowired
     private TaskRepository taskRepository;
 
@@ -26,9 +26,10 @@ public class TaskService {
 
     @Transactional
     public Task craete(Task obj) {
+        User user = this.userService.findById(obj.getUser().getId());
         obj.setId(null);
-        obj = this.taskRepository.save(obj);
-        return obj;
+        obj.setUser(user);
+        return this.taskRepository.save(obj);
     }
 
     @Transactional
@@ -43,7 +44,7 @@ public class TaskService {
         try {
             this.taskRepository.deleteById(id);
         } catch(Exception e) {
-            throw new RuntimeException("Não foi possivel deletar a tarefa!");
+            throw new RuntimeException("Não a possivel excluir pois há entidades relacionadas");
         }
     }
 }
