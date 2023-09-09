@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.todoTask.models.Task;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,19 +18,23 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Transactional
+    public Task create(Task obj) {
+        User user = this.userService.findById(obj.getUser().getId());
+        obj.setId(null);
+        obj.setUser(user);
+        return this.taskRepository.save(obj);
+    }
+
+    public List<Task> findAllByUserId(Long userId) {
+        return this.taskRepository.findByUser_Id(userId);
+    }
+
     public Task findById(Long id) {
         Optional<Task> task = this.taskRepository.findById(id);
         return task.orElseThrow(() -> new RuntimeException(
                 "Task não encontrada! Id: " + id + ", Tipo: " + Task.class.getName()
         ));
-    }
-
-    @Transactional
-    public Task craete(Task obj) {
-        User user = this.userService.findById(obj.getUser().getId());
-        obj.setId(null);
-        obj.setUser(user);
-        return this.taskRepository.save(obj);
     }
 
     @Transactional

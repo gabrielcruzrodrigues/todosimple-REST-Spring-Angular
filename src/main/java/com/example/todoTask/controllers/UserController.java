@@ -45,7 +45,6 @@ public class UserController {
     @PutMapping("/{id}")
     @Validated(User.UpdateUser.class)
     public ResponseEntity<User> update(@Valid @RequestBody User userObj, @PathVariable Long id) {
-        userService.findById(id);
         userObj.setId(id);
         User userUpdate = this.userService.update(userObj);
         return ResponseEntity.status(HttpStatus.OK).body(userUpdate);
@@ -53,7 +52,6 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
-        userService.findById(id);
         userService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body("Usuario deletado");
     }
