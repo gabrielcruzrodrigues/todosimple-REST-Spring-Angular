@@ -1,6 +1,7 @@
 package com.example.todoTask.controllers;
 
 import com.example.todoTask.services.TaskService;
+import com.example.todoTask.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.todoTask.models.Task;
@@ -21,6 +22,9 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping
     public ResponseEntity<String>create(@Valid @RequestBody Task taskObj) {
         this.taskService.create(taskObj);
@@ -36,6 +40,7 @@ public class TaskController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Task>> findAllByUserId(@PathVariable Long userId) {
+        this.userService.findById(userId);
         List<Task> tasks = this.taskService.findAllByUserId(userId);
         return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
