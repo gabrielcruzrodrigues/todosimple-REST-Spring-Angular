@@ -14,9 +14,7 @@ import java.util.ArrayList;
 @Table(name = "TB_USER")
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class User {
 
     public interface CreateUser{}
