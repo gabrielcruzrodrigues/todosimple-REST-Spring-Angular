@@ -1,8 +1,13 @@
 package com.example.todoTask.exceptions;
 
+import com.example.todoTask.services.exceptions.DataBindingViolationException;
+import com.example.todoTask.services.exceptions.ObjectNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -45,7 +50,68 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             WebRequest request) {
         final String errorMessege = "Unknown error occurred";
         log.error(errorMessege, exception);
-        return buildErrorResponse(exception, errorMessege, HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return buildErrorResponse(
+                exception,
+                errorMessege,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<Object> handleDataIntegrityViolationException(
+            DataIntegrityViolationException dataIntegrityViolationException,
+            WebRequest request) {
+        String errorMessage = dataIntegrityViolationException.getMostSpecificCause().getMessage();
+        log.error("Failed do save entity with integrity problems: " + errorMessage, dataIntegrityViolationException);
+        return buildErrorResponse(
+                dataIntegrityViolationException,
+                errorMessage,
+                HttpStatus.CONFLICT,
+                request);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<Object> handleConstraintViolationException(
+            ConstraintViolationException constraintViolationException,
+            WebRequest request) {
+        log.error("Failed to validate element", constraintViolationException);
+        return buildErrorResponse(
+                constraintViolationException,
+                HttpStatus.CONFLICT,
+                request);
+    }
+
+    @ExceptionHandler(ObjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Object> objectNotFoundException(
+            ObjectNotFoundException objectNotFoundException,
+            WebRequest request) {
+        log.error("Failed to find the requested element", objectNotFoundException);
+        return buildErrorResponse(
+                objectNotFoundException,
+                HttpStatus.NOT_FOUND,
+                request);
+    }
+
+    @ExceptionHandler(DataBindingViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<Object> handleDataBindingViolationException(
+            DataBindingViolationException dataBindingViolationException,
+            WebRequest request) {
+        log.error("Failed to save entity with associated data", dataBindingViolationException);
+        return buildErrorResponse(
+                dataBindingViolationException,
+                HttpStatus.CONFLICT,
+                request);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(
+            Exception exception,
+            HttpStatus httpStatus,
+            WebRequest request) {
+        return buildErrorResponse(exception, exception.getMessage(), httpStatus, request);
     }
 
     private ResponseEntity<Object> buildErrorResponse(

@@ -1,6 +1,8 @@
 package com.example.todoTask.services;
 
 import com.example.todoTask.repositories.UserRepository;
+import com.example.todoTask.services.exceptions.DataBindingViolationException;
+import com.example.todoTask.services.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.todoTask.models.User;
@@ -16,7 +18,7 @@ public class UserService {
 
     public User findById(Long id) {
         Optional<User> user = this.userRepository.findById(id);
-        return user.orElseThrow(() -> new RuntimeException(
+        return user.orElseThrow(() -> new ObjectNotFoundException(
            "Usuário não encontrado! Id: " + id + ", Tipo: " + User.class.getName()
         ));
     }
@@ -40,7 +42,7 @@ public class UserService {
         try {
             this.userRepository.deleteById(id);
         } catch(Exception e) {
-            throw new RuntimeException("Não a possivel excluir pois há entidades relacionadas");
+            throw new DataBindingViolationException("Não a possivel excluir pois há entidades relacionadas");
         }
     }
 }
